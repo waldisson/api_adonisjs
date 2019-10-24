@@ -3,20 +3,36 @@
 const Project = use('App/Models/Project')
 
 class ProjectController {
-  async index ({ request, response, view }) {
-    const projects = await Project.query().with('user').fetch()
+  /**
+   * Show a list of all projects.
+   * GET projects
+   */
+  async index ({ request }) {
+    const { page } = request.get()
+
+    const projects = await Project.query()
+      .with('user')
+      .paginate(page)
 
     return projects
   }
 
+  /**
+   * Create/save a new project.
+   * POST projects
+   */
   async store ({ request, response, auth }) {
-    const data = await request.only(['title', 'description'])
+    const data = request.only(['title', 'description'])
 
     const project = await Project.create({ ...data, user_id: auth.user.id })
 
     return project
   }
 
+  /**
+   * Display a single project.
+   * GET projects/:id
+   */
   async show ({ params }) {
     const project = await Project.findOrFail(params.id)
 
@@ -26,21 +42,29 @@ class ProjectController {
     return project
   }
 
-  async update ({ params, request, response }) {
+  /**
+   * Update project details.
+   * PUT or PATCH projects/:id
+   */
+  async update ({ params, request }) {
     const project = await Project.findOrFail(params.id)
-    const data = await request.only(['title', 'description'])
+
+    const data = request.only(['title', 'description'])
 
     project.merge(data)
-
-    await project.save()
+    project.save()
 
     return project
   }
 
+  /**
+   * Delete a project with id.
+   * DELETE projects/:id
+   */
   async destroy ({ params }) {
     const project = await Project.findOrFail(params.id)
 
-    await project.delete()
+    project.delete()
   }
 }
 

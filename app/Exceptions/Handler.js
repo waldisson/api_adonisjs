@@ -1,7 +1,9 @@
 'use strict'
 
+const Config = use('Config')
 const Env = use('Env')
 const Youch = use('Youch')
+const Raven = use('Raven')
 const BaseExceptionHandler = use('BaseExceptionHandler')
 
 class ExceptionHandler extends BaseExceptionHandler {
@@ -21,7 +23,8 @@ class ExceptionHandler extends BaseExceptionHandler {
   }
 
   async report (error, { request }) {
-    console.log(error)
+    Raven.config(Config.get('services.sentry.dsn'))
+    Raven.captureException(error)
   }
 }
 
